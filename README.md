@@ -1,5 +1,5 @@
 # Platzi - Twitter API
-> This project is part of the course "[Clases del Curso de FastAPI: Modularización, Datos Avanzados y Errores
+> This project is part of the course "[Curso de FastAPI: Modularización, Datos Avanzados y Errores
 ](https://platzi.com/clases/fastapi-modularizacion-datos/)" of "[Platzi](https://platzi.com)"
 
 ## Table of Contents:
