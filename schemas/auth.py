@@ -6,17 +6,31 @@ from pydantic import Field
 from schemas.user import UserOut
 
 
-class JWTAccessToken(BaseModel):
-    access_token: str
+class BaseJWTAccessToken(BaseModel):
+    access_token: str = Field(...,
+                              min_length=8,
+                              example='access_token',)
 
-    access_token_expiration: int
+
+class JWTAccessToken(BaseJWTAccessToken):
+    access_token_expiration: int = Field(...,
+                                         gt=0,
+                                         example=60,
+                                         description='Access token expiration in seconds')
 
 
-class JWTRefreshToken(BaseModel):
+class BaseJWTRefreshToken(BaseModel):
+    refresh_token: str = Field(...,
+                               min_length=8,
+                               example='refresh_token',)
 
-    refresh_token: str
 
-    refresh_token_expiration: int
+class JWTRefreshToken(BaseJWTRefreshToken):
+
+    refresh_token_expiration: int = Field(...,
+                                          gt=0,
+                                          example=60,
+                                          description='Refresh token expiration in seconds')
 
 
 class JWTCredentials(JWTAccessToken, JWTRefreshToken):
