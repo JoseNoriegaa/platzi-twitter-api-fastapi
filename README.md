@@ -28,7 +28,7 @@ Features included:
 ## Installation
 1. Clone or download de repository:
     ```
-    $ git clone https://github.com/JoseNoriegaa/plazi-twitter-api-fastapi
+    $ git clone https://github.com/JoseNoriegaa/platzi-twitter-api-fastapi
     ```
 
 2. Open the console inside the project directory and create a virtual environment.

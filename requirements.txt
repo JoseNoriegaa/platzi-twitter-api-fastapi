@@ -11,3 +11,8 @@ sniffio==1.2.0
 starlette==0.16.0
 typing-extensions==3.10.0.2
 uvicorn==0.15.0
+python-environ==0.4.54
+SQLAlchemy==1.4.26
+PyMySQL==1.0.2
+cryptography==35.0.0
+pydottie==0.0.2
