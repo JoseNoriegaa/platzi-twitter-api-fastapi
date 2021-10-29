@@ -85,7 +85,9 @@ def create_credentials(user: Union[dict, UserOut]) -> Dict[str, Any]:
         }
 
     access_token, access_expiration_time = create_access_token(user_payload)
-    refresh_token, refresh_expiration_time = create_refresh_token(user_payload)
+    refresh_token, refresh_expiration_time = create_refresh_token({
+        'sub': user_payload['sub'],
+    })
 
     output = {
         'access_token': access_token,
@@ -111,6 +113,8 @@ def verify_token(token: str) -> Union[Dict[str, Any], None]:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
     except jwt.exceptions.InvalidSignatureError:
+        return None
+    except jwt.exceptions.ExpiredSignatureError:
         return None
     except jwt.exceptions.DecodeError:
         return None
