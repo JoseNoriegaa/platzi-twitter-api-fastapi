@@ -8,21 +8,24 @@ from fastapi import HTTPException
 from fastapi import Response
 from fastapi import Body
 from fastapi import Path
-
-# Crypto
-from cryptography.fernet import Fernet
+from fastapi import Depends
 
 # Database
 from config.db import connection
+
+# Middlewares
+from middleware.auth import get_current_user
 
 # Models
 from models.user import User
 
 # Schemas
-from schemas.user import CreateUser, UserOut
+from schemas.user import CreateUser
+from schemas.user import UserOut
+from schemas.user import User as UserSchema
 
 # Utils
-from config.settings import SECRET_KEY
+from utils.passwords import hash_password
 
 
 router = APIRouter()
@@ -99,11 +102,14 @@ def update_user(
                    gt=0,
                    title='User ID',
                    description='ID of the user to update'),
-    user: CreateUser = Body(...,)
+    user: CreateUser = Body(...,),
+    request_user: UserSchema = Depends(get_current_user),
 ):
     """Update user.
 
     This operation path updates the information of a specific user.
+
+    Users can only update their own information.
 
     Parameters:
     - Path parameters:
@@ -127,13 +133,17 @@ def update_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='User not found')
 
+    if user_response.id != request_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='You are not allowed to perform this action')
+
     # Update user
     updated_user = {
         **user_response,
         **user.dict(),
     }
 
-    updated_user['password'] = Fernet(SECRET_KEY).encrypt(user.password.encode('utf-8')).decode('utf-8')
+    updated_user['password'] = hash_password(updated_user['password'])
 
     # Save user
     connection.execute(User.update(User.c.id == id).values(**updated_user))
@@ -152,22 +162,28 @@ def delete_user(
                    gt=0,
                    title='User ID',
                    description='ID of the user to delete'),
+    request_user: UserSchema = Depends(get_current_user),
 ):
     """Delete user.
 
     This path operation deletes a specific user in the app.
+
+    Users can only delete their own information.
 
     Parameters:
     - Path parameters:
         - id: **str**
     """
 
-    # Check if user exists
-    user = connection.execute(User.select().where(User.c.id == id)).fetchone()
+    user_response = connection.execute(User.select().where(User.c.id == id)).fetchone()
 
-    if user is None:
+    if user_response is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='User not found')
+
+    if user_response.id != request_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='You are not allowed to perform this action')
 
     # Delete user
     connection.execute(User.delete().where(User.c.id == id))
