@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from fastapi import status
 from fastapi import Body
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 
 # Database
 from config.db import connection
@@ -53,7 +54,18 @@ def signup(user: CreateUser = Body(...)):
     user_dict = user.dict()
     user_dict['password'] = hash_password(user_dict['password'])
 
-    response = connection.execute(User.insert().values(**user_dict))
+    try:
+        response = connection.execute(User.insert().values(**user_dict))
+    except IntegrityError as e:
+        str_error = str(e)
+        if 'Duplicate entry' in str_error and 'users.email' in str_error:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail='Email already registered.') from e
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail='Internal server error.') from e
 
     user_dict['id'] = response.lastrowid
     user_dict['birth_date'] = str(user_dict['birth_date'])

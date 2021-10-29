@@ -9,6 +9,7 @@ from fastapi import Response
 from fastapi import Body
 from fastapi import Path
 from fastapi import Depends
+from sqlalchemy.exc import IntegrityError
 
 # Database
 from config.db import connection
@@ -146,7 +147,18 @@ def update_user(
     updated_user['password'] = hash_password(updated_user['password'])
 
     # Save user
-    connection.execute(User.update(User.c.id == id).values(**updated_user))
+    try:
+        connection.execute(User.update(User.c.id == id).values(**updated_user))
+    except IntegrityError as e:
+        str_error = str(e)
+        if 'Duplicate entry' in str_error and 'users.email' in str_error:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail='Email already registered.') from e
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail='Internal server error.') from e
 
     updated_user['updated_at'] = str(datetime.now())
 

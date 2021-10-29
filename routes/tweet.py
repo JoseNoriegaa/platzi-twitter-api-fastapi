@@ -98,7 +98,7 @@ def retrieve_tweet(
 
     Parameters:
     - Path parameters:
-        -   **id: str**
+        - id: **str**
 
     Returns a json with the tweet information:
     - id: **int**
@@ -156,7 +156,7 @@ def create_tweet(
 
     Parameters:
     - Request body parameters:
-        - **tweet: RegisterTweet**
+        - tweet: **BaseTweet**
 
     Returns a json with the basic tweet information:
     - id: **int**
@@ -251,7 +251,7 @@ def delete_tweet(
 
     Parameters:
     - Request body parameters:
-        - **tweet: RegisterTweet**
+        - tweet: **BaseTweet**
     """
 
     tweet_response = connection.execute(Tweet.select().where(Tweet.c.id == id)).fetchone()
