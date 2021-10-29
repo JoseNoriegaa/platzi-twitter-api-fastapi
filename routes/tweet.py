@@ -2,7 +2,7 @@ from typing import List
 from datetime import datetime
 
 # PyDottie
-import pydottie
+import pydottie  # type: ignore
 
 # SQLAlchemy
 from sqlalchemy import text
@@ -27,9 +27,6 @@ from config.db import connection
 from schemas.tweet import Tweet as TweetOut
 from schemas.tweet import TweetWithRelations
 from schemas.tweet import RegisterTweet
-
-# Utils
-from utils.pydottie import transform
 
 
 router = APIRouter()
@@ -196,7 +193,7 @@ def update_tweet(
                    title='Tweet ID',
                    description='The ID of the tweet to update'),
     tweet: RegisterTweet = Body(...),
-) -> Tweet:
+):
     """Update tweet.
 
     This path operation allows to update the content of a tweet.

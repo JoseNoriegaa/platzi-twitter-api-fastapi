@@ -1,4 +1,4 @@
-import uvicorn
+import uvicorn  # type: ignore
 
 from config.settings import PORT
 from config.settings import DEBUG

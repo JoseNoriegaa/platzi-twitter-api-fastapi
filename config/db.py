@@ -1,6 +1,6 @@
 # SQLAlchemy
-from sqlalchemy import create_engine
-from sqlalchemy import MetaData
+from sqlalchemy import create_engine   # type: ignore
+from sqlalchemy import MetaData  # type: ignore
 
 # Local
 from config.settings import DATABASE_URL

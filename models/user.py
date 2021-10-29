@@ -1,7 +1,4 @@
-import datetime
-
-
-from datetime import date, datetime
+from datetime import datetime
 
 # SSQLAlchemy
 from sqlalchemy import Table
@@ -10,8 +7,6 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import TIMESTAMP
 from sqlalchemy import Date
-from sqlalchemy import text
-from sqlalchemy.sql import func
 
 
 # Database

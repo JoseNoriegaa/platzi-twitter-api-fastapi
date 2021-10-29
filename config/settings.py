@@ -1,5 +1,5 @@
 import os
-import environ
+import environ  # type: ignore
 
 _env = environ.Env(
     DEBUG=(bool, False),
@@ -25,3 +25,10 @@ USERS_STORAGE = os.path.join(os.path.dirname(__file__), '..', USERS_FILE)
 
 TWEETS_FILE = 'tweets.json'
 TWEETS_STORAGE = os.path.join(os.path.dirname(__file__), '..', TWEETS_FILE)
+
+# JWT
+JWT_ACCESS_TOKEN_TYPE = 'access'
+JWT_ACCESS_TOKEN_EXPIRATION = 60 * 24 # 1 day
+
+JWT_REFRESH_TOKEN_TYPE = 'refresh'
+JWT_REFRESH_TOKEN_EXPIRATION = 60 * 24 * 7 # 1 week

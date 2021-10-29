@@ -16,3 +16,7 @@ SQLAlchemy==1.4.26
 PyMySQL==1.0.2
 cryptography==35.0.0
 pydottie==0.0.2
+PyJWT==2.3.0
+bcrypt==3.2.0
+sqlalchemy-stubs==0.4
+mypy==0.910

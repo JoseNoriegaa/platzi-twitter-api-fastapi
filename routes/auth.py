@@ -4,10 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter
 from fastapi import status
 from fastapi import Body
-from fastapi import Path
-
-# Cryptography
-from cryptography.fernet import Fernet
+from fastapi import HTTPException
 
 # Database
 from config.db import connection
@@ -18,10 +15,13 @@ from models.user import User
 # Schemas
 from schemas.user import CreateUser
 from schemas.user import UserOut
+from schemas.auth import LoginRequest
+from schemas.auth import LoginReponse
 
 # Utils
-from config.settings import SECRET_KEY
-
+from utils.passwords import hash_password
+from utils.passwords import check_password
+from utils.jsonwebtoken import create_credentials
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ def signup(user: CreateUser = Body(...)):
 
     Parameters:
     - Request body parameters:
-        - **user: UserRegister**
+        - user: **UserRegister**
 
     Returns a json object with the information of the registered user.
     - id: **int**
@@ -51,7 +51,7 @@ def signup(user: CreateUser = Body(...)):
     """
 
     user_dict = user.dict()
-    user_dict['password'] = Fernet(SECRET_KEY).encrypt(user_dict['password'].encode('utf-8')).decode('utf-8')
+    user_dict['password'] = hash_password(user_dict['password'])
 
     response = connection.execute(User.insert().values(**user_dict))
 
@@ -63,10 +63,44 @@ def signup(user: CreateUser = Body(...)):
     return user_dict
 
 
-# @router.post('/login',
-#           response_model=UserLogin,
-#           status_code=status.HTTP_200_OK,
-#           summary='Login',
-#           tags=['Auth', 'Users'])
-# def login(user: User) -> User:
-#     pass
+@router.post('/login',
+          response_model=LoginReponse,
+          status_code=status.HTTP_200_OK,
+          summary='Login',
+          tags=['Auth', 'Users'])
+def login(user: LoginRequest = Body(...)):
+    """Login route.
+
+    This operation path allows a user to login in the app.
+
+    Parameters:
+    - Request body parameters:
+        - user: **LoginRequest**
+
+    Returns a json object with the information of the logged user.
+    - user: **UserOut**
+    - access_token: **str**
+    - access_token_expiration: **int**
+    - refresh_token: **str**
+    - refresh_token_expiration: **int**
+    """
+
+    registed_user = connection.execute(User.select().where(User.c.email == user.email)).fetchone()
+
+    if registed_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='User not found')
+
+
+    password_match = check_password(user.password, registed_user.password)
+
+    if not password_match:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail='Invalid credentials')
+
+    response = {
+        'user': UserOut(**registed_user),
+    }
+    response.update(create_credentials(response['user']))
+
+    return response
